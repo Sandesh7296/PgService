@@ -1,0 +1,244 @@
+mysql> select* from customers;
++------+----------+----------+--------+------+
+| cnum | cname    | city     | rating | snum |
++------+----------+----------+--------+------+
+| 2001 | Hoffman  | London   |    100 | 1001 |
+| 2002 | Giovanni | Rome     |    200 | 1003 |
+| 2003 | Liu      | San Jose |    200 | 1002 |
+| 2004 | Grass    | Berlin   |    300 | 1002 |
+| 2006 | Clemens  | London   |    100 | 1001 |
+| 2008 | Cisneros | San Jose |    300 | 1007 |
+| 2007 | Pereira  | Rome     |    100 | 1004 |
++------+----------+----------+--------+------+
+select * from orders where amt> any (select min(amt) from orders where cnum in (select cnum from customers where city ='London'));
+mysql> select* from orders;
+
+select * from orders where amt> any (select min(amt) from orders where cnum in (select cnum from customers where city ='London'));
++------+---------+------------+------+------+
+| onum | amt     | odate      | cnum | snum |
++------+---------+------------+------+------+
+| 3002 | 1900.10 | 1990-10-03 | 2007 | 1004 |
+| 3005 | 5160.45 | 1990-10-03 | 2003 | 1002 |
+| 3006 | 1098.16 | 1990-10-03 | 2008 | 1007 |
+| 3009 | 1713.23 | 1990-10-04 | 2002 | 1003 |
++------+---------+------------+------+------+
+
++------+---------+------------+------+------+
+| onum | amt     | odate      | cnum | snum |
++------+---------+------------+------+------+select avg(amt) from orders;
++-------------+
+| avg(amt)    |
++-------------+
+| 2565.840000 |
++-------------+
+
+| 3001 |   18.69 | 1990-10-03 | 2008 | 1007 |
+| 3003 |  767.19 | 1990-10-03 | 2001 | 1001 |
+| 3002 | 1900.10 | 1990-10-03 | 2007 | 1004 |
+| 3005 | 5160.45 | 1990-10-03 | 2003 | 1002 |
+| 3006 | 1098.16 | 1990-10-03 | 2008 | 1007 |
+| 3009 | 1713.23 | 1990-10-04 | 2002 | 1003 |
+| 3007 |   75.75 | 1990-10-04 | 2004 | 1002 |
+| 3008 | 4723.00 | 1990-10-04 | 2006 | 1001 |
+| 3010 |  309.95 | 1990-10-04 | 2004 | 1002 |
+| 3011 | 9891.88 | 1990-10-04 | 2006 | 1001 |
++------+---------+------------+------+------+
+10 rows in set (0.34 sec)
+
+
+mysql> select * from orders where cnum =(select cnum from customers where cname='Cisneros');
++------+---------+------------+------+------+
+| onum | amt     | odate      | cnum | snum |
++------+---------+------------+------+------+
+| 3001 |   18.69 | 1990-10-03 | 2008 | 1007 |
+| 3006 | 1098.16 | 1990-10-03 | 2008 | 1007 |
++------+---------+------------+------+------+
+
+mysql> select* from orders order by cnum;
++------+---------+------------+------+------+
+| onum | amt     | odate      | cnum | snum |
++------+---------+------------+------+------+
+| 3003 |  767.19 | 1990-10-03 | 2001 | 1001 |
+| 3009 | 1713.23 | 1990-10-04 | 2002 | 1003 |
+| 3005 | 5160.45 | 1990-10-03 | 2003 | 1002 |
+| 3007 |   75.75 | 1990-10-04 | 2004 | 1002 |
+| 3010 |  309.95 | 1990-10-04 | 2004 | 1002 |
+| 3008 | 4723.00 | 1990-10-04 | 2006 | 1001 |
+| 3011 | 9891.88 | 1990-10-04 | 2006 | 1001 |
+| 3002 | 1900.10 | 1990-10-03 | 2007 | 1004 |
+| 3001 |   18.69 | 1990-10-03 | 2008 | 1007 |
+| 3006 | 1098.16 | 1990-10-03 | 2008 | 1007 |
++------+---------+------------+------+------+
+10 rows in set (0.00 sec)
+
+select avg(amt) from orders;
++-------------+
+| avg(amt)    |
++-------------+
+| 2565.840000 |
++-------------+
+
+mysql> select cname , rating from customers  where cnum in (select cnum  from orders group by cnum having sum(amt)>(select avg(amt) from orders));
++---------+--------+
+| cname   | rating |
++---------+--------+
+| Liu     |    200 |
+| Clemens |    100 |
++---------+--------+
+2 rows in set (0.00 sec)
+
+ysql> select snum from orders group by snum having sum(amt)>( select max(amt) from orders);
++------+
+| snum |
++------+
+| 1001 |
++------+
+
+
+
+
+
+
+assigment 12 ;
+
+elect snum from salespeople where sname = 'serres';
++------+
+| snum |
++------+
+| 1002 |
++------+
+ysql> select rating from customers where snum in (select snum from salespeople where sname = 'serres');
++--------+
+| rating |
++--------+
+|    200 |
+|    300 |
+
+
+mysql> select * from customers where rating >=any(select rating from customers where snum in (select snum from salespeople where sname = 'serres'));
++------+----------+----------+--------+------+
+| cnum | cname    | city     | rating | snum |
++------+----------+----------+--------+------+
+| 2002 | Giovanni | Rome     |    200 | 1003 |
+| 2003 | Liu      | San Jose |    200 | 1002 |
+| 2004 | Grass    | Berlin   |    300 | 1002 |
+| 2008 | Cisneros | San Jose |    300 | 1007 |
++------+----------+----------+--------+------+
+4 rows in set (0.00 sec)
+
+
+uncomplte 
+mysql> select * from salespeople where city !=any(select city from customers);
++------+---------+-----------+------+
+| snum | sname   | city      | comm |
++------+---------+-----------+------+
+| 1001 | Peel    | London    | 0.12 |
+| 1002 | Serres  | San Jose  | 0.13 |
+| 1004 | Motika  | London    | 0.11 |
+| 1007 | Rifkin  | Barcelona | 0.15 |
+| 1003 | Axelrod | New York  | 0.10 |
++------+---------+-----------+------+
+5 rows in set (0.00 sec)
+
+mysql> select * from orders where amt> any (select min(amt) from orders where cnum in (select cnum from customers where city ='London'));
++------+---------+------------+------+------+
+| onum | amt     | odate      | cnum | snum |
++------+---------+------------+------+------+
+| 3002 | 1900.10 | 1990-10-03 | 2007 | 1004 |
+| 3005 | 5160.45 | 1990-10-03 | 2003 | 1002 |
+| 3006 | 1098.16 | 1990-10-03 | 2008 | 1007 |
+| 3009 | 1713.23 | 1990-10-04 | 2002 | 1003 |
+| 3008 | 4723.00 | 1990-10-04 | 2006 | 1001 |
+| 3011 | 9891.88 | 1990-10-04 | 2006 | 1001 |
++------+---------+------------+------+------+
+6 rows in set (0.00 sec)
+
+
+assigment 14
+
+
+mysql> select cname ,city, rating,'high rating' from customers where rating>=200 union select cname ,city, rating,'low rating' from customers where rating<200;
++----------+----------+--------+-------------+
+| cname    | city     | rating | high rating |
++----------+----------+--------+-------------+
+| Giovanni | Rome     |    200 | high rating |
+| Liu      | San Jose |    200 | high rating |
+| Grass    | Berlin   |    300 | high rating |
+| Cisneros | San Jose |    300 | high rating |
+| Hoffman  | London   |    100 | low rating  |
+| Clemens  | London   |    100 | low rating  |
+| Pereira  | Rome     |    100 | low rating  |
++----------+----------+--------+-------------+
+
+
+
+mysql> delete from orders where cnum=(select cnum from customers where cname='Clemens');
+Query OK, 2 rows affected (0.77 sec)
+
+mysql> select *  from orders;
++------+---------+------------+------+------+
+| onum | amt     | odate      | cnum | snum |
++------+---------+------------+------+------+
+| 3001 |   18.69 | 1990-10-03 | 2008 | 1007 |
+| 3003 |  767.19 | 1990-10-03 | 2001 | 1001 |
+| 3002 | 1900.10 | 1990-10-03 | 2007 | 1004 |
+| 3005 | 5160.45 | 1990-10-03 | 2003 | 1002 |
+| 3006 | 1098.16 | 1990-10-03 | 2008 | 1007 |
+| 3009 | 1713.23 | 1990-10-04 | 2002 | 1003 |
+| 3007 |   75.75 | 1990-10-04 | 2004 | 1002 |
+| 3010 |  309.95 | 1990-10-04 | 2004 | 1002 |
++------+---------+------------+------+------+
+
+mysql> update customers set rating =rating +100  where city = 'Rome';
+Query OK, 2 rows affected (0.56 sec)
+
+
+mysql> select *  from customers;
++------+----------+----------+--------+------+
+| cnum | cname    | city     | rating | snum |
++------+----------+----------+--------+------+
+| 2001 | Hoffman  | London   |    100 | 1001 |
+| 2002 | Giovanni | Rome     |    400 | 1003 |
+| 2003 | Liu      | San Jose |    200 | 1002 |
+| 2004 | Grass    | Berlin   |    300 | 1002 |
+| 2006 | Clemens  | London   |    100 | 1001 |
+| 2008 | Cisneros | San Jose |    300 | 1007 |
+| 2007 | Pereira  | Rome     |    300 | 1004 |
++------+----------+----------+--------+------+
+7 rows in set (0.00 sec)
+
+
+
+
+
+mysql> select cnum,cname from customers where snum=( select snum from salespeople where sname='Serres');
++------+-------+
+| cnum | cname |
++------+-------+
+| 2003 | Liu   |
+| 2004 | Grass |
++------+-------+
+
+
+mysql> update customers  set snum =(select snum from salespeople where sname='motika' )where snum =(select snum from salespeople where sname='Serres') ;
+Query OK, 0 rows affected (0.00 sec)
+Rows matched: 0  Changed: 0  Warnings: 0
+
+mysql> select *  from customers;
++------+----------+----------+--------+------+
+| cnum | cname    | city     | rating | snum |
++------+----------+----------+--------+------+
+| 2001 | Hoffman  | London   |    100 | 1001 |
+| 2002 | Giovanni | Rome     |    400 | 1003 |
+| 2003 | Liu      | San Jose |    200 | 1004 |
+| 2004 | Grass    | Berlin   |    300 | 1004 |
+| 2006 | Clemens  | London   |    100 | 1001 |
+| 2008 | Cisneros | San Jose |    300 | 1007 |
+| 2007 | Pereira  | Rome     |    300 | 1004 |
++------+----------+----------+--------+------+
+
+
+
+assigment 15
+
+
